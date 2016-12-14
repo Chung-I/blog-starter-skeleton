@@ -1,5 +1,7 @@
 import 'isomorphic-fetch';
 import React, { Component, PropTypes } from 'react';
+import TagsInput from 'react-tagsinput';
+import 'react-tagsinput/react-tagsinput.css';
 
 class SingleArticlePage extends Component {
   static propTypes = {
@@ -18,27 +20,98 @@ class SingleArticlePage extends Component {
   componentDidMount() {
     const id = this.props.id;
     fetch(`/api/articles/${id}`)
-      .then()
+      .then(res => res.json())
+      .then(json => {
+        this.setState({
+          title: json.title,
+          content: json.content,
+          tags: json.tags
+        });
+      });
     // fetch with id
   }
 
-  componentDidUpdate() {
+  /*componentDidUpdate() {
     // fetch with id
+    const id = this.props.id;
+    fetch(`/api/articles/${id}`)
+      .then(res => res.json())
+      .then(json => {
+        this.setState({
+          title: json.title,
+          content: json.content,
+          tags: json.tags
+        });
+      });
+  }*/
+
+
+  handleTagsChange = tags => {
+    this.setState({ tags });
   }
 
-  handleTagsChange = () => {};
+  handleTitleChange = event => {
+    this.setState({
+      title: event.target.value
+    });
+  }
 
-  handleTitleChange = () => {};
+  handleContentChange = event => {
+    this.setState({
+      content: event.target.value
+    });
+  }
 
-  handleDelClick = () => {};
+  handleDelClick = () => {
+    const confirm = window.confirm('確定要刪除文章嗎？');
+    if (confirm) {
+      fetch(`/api/articles/${this.props.id}`, {
+        method: 'DELETE'
+      })
+      .then(() => { document.location.href = '#/articles'; });
+    }
+  };
 
-  handleEditClick = () => {};
+  handleEditClick = () => {
+    const isEditing = this.state.isEditing;
+    this.setState({ isEditing: !isEditing });
+    if (isEditing) {
+      fetch(`/api/articles/${this.props.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.state)
+      });
+    }
+  };
+  renderContent = () => (this.state.isEditing ?
+    (<textarea
+      className="form-control"
+      rows="12"
+      value={this.state.content}
+      onChange={this.handleContentChange}
+    />) :
+    (<p>{this.state.content}</p>));
 
-  renderTitle = () => {};
+  renderTags = () => {
+    let handleChange = () => {};
+    if (this.state.isEditing) handleChange = this.handleTagsChange;
+    return (<TagsInput
+      value={this.state.tags}
+      onChange={handleChange}
+    />);
+  };
 
-  renderTags = () => {};
-
-  renderContent = () => {};
+  renderTitle = () => (this.state.isEditing ?
+    (<input
+      type="text"
+      className="form-control"
+      value={this.state.title}
+      onChange={this.handleTitleChange}
+      required
+    />) :
+    (<p className="h1">{this.state.title}</p>));
 
   render() {
     const { isEditing } = this.state;

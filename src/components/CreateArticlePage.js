@@ -1,6 +1,7 @@
 import 'isomorphic-fetch';
 import React, { Component } from 'react';
-import { Editor, EditorState, RichUtils } from 'draft-js';
+import TagsInput from 'react-tagsinput';
+import 'react-tagsinput/react-tagsinput.css';
 
 
 class CreateArticlePage extends Component {
@@ -9,43 +10,47 @@ class CreateArticlePage extends Component {
     this.state = {
       title: '',
       content: '',
-      tags: [],
-      editorState: EditorState.createEmpty()
+      tags: []
     };
-    this.onChange = editorState => this.setState({ editorState: editorState });
   }
 
-  onEditorChange = editorContent => {
+  handleContentChange = event => {
     this.setState({
-      content: editorContent
+      content: event.target.value
     });
   }
 
-  handleKeyCommand = command => {
-    const newState = RichUtils.handleKeyCommand(this.state.editorState, command);
-    if (newState) {
-      this.onChange(newState);
-      return 'handled';
-    }
-    return 'not-handled';
+  handleTitleChange = event => {
+    this.setState({
+      title: event.target.value
+    });
   }
 
-  _onBoldClick = () => {
-    this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, 'BOLD'));
+  handleTagsChange = tags => {
+    this.setState({ tags });
   }
 
+  clearState = () => {
+    this.setState({
+      title: '',
+      tags: [],
+      content: ''
+    });
+  }
 
   handleSubmitClick = () => {
     const confirm = window.confirm('確定要新增文章嗎？');
     if (confirm) {
       // fetch here
-      const body = this.state;
       fetch('/api/articles', {
+        method: 'POST',
         headers: {
-          'Accept': 'application/json',
           'Content-Type': 'application/json'
-        }
-      });
+        },
+        body: JSON.stringify(this.state)
+      })
+      .then(this.clearState)
+      .then(() => { document.location.href = '#/articles'; });
     }
   }
 
@@ -63,21 +68,33 @@ class CreateArticlePage extends Component {
         </div>
         <div className="row">
           <div className="col-md-12">
-            <input type="text" />
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Add a title"
+              value={this.state.title}
+              onChange={this.handleTitleChange}
+              required
+            />
           </div>
         </div>
         <div className="row">
           <div className="col-md-12">
-            {/* tags */}
+          <label htmlFor="tags">Tags</label>
+            <TagsInput value={this.state.tags} onChange={this.handleTagsChange} />
           </div>
         </div>
         <div className="row">
           <div className="col-md-12">
-            <button onClick={this._onBoldClick}>Bold</button>
-            <Editor
-              editorState={this.state.editorState}
-              handleKeyCommand={this.handleKeyCommand}
-              onChange={this.onChange}
+            <label htmlFor="content">Content</label>
+            <textarea
+              className="form-control"
+              rows="12"
+              placeholder="Write here"
+              value={this.state.content}
+              onChange={this.handleContentChange}
+              required
             />
           </div>
         </div>

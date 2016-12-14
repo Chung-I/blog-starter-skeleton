@@ -9,7 +9,9 @@ const options = {
 
 const articleSchema = mongoose.Schema({
   id: String,
-  // add more
+  title: String,
+  content: String,
+  tags: [String]
 }, options);
 
 export const Article = mongoose.model('Article', articleSchema);

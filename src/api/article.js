@@ -20,7 +20,7 @@ articleRouter.get('/:id', (req, res) => {
 
 articleRouter.post('/', (req, res) => {
   const { title, content, tags } = req.body;
-
+  console.log(req.body);
   Article.create({
     title,
     content,

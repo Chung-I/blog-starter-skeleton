@@ -16,6 +16,9 @@ class SingleArticlePage extends Component {
   }
 
   componentDidMount() {
+    const id = this.props.id;
+    fetch(`/api/articles/${id}`)
+      .then()
     // fetch with id
   }
 

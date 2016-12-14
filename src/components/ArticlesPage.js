@@ -10,6 +10,13 @@ class ArticlesPage extends Component {
 
   componentDidMount() {
     // fetch here
+    fetch('api/articles')
+      .then(res => res.json())
+      .then(json => {
+        this.setState({
+          articles: json
+        });
+      });
   }
 
   render() {
